@@ -1,0 +1,26 @@
+{
+  "name": "day-4-express-middleware-validation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express quiz attempt route with request ID middleware and validation",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest --runInBand --runTestsByPath tests/unit.test.js",
+    "test:integration": "jest --runInBand --runTestsByPath tests/quizAttempts.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  }
+}
+
