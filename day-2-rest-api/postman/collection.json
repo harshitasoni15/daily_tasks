@@ -1,0 +1,197 @@
+{
+  "info": {
+    "_postman_id": "c5409a82-c978-4cc7-92d2-b9d34dfb8439",
+    "name": "Day 2 - Course Project Portfolio API",
+    "description": "Runs the four portfolio API endpoints plus invalid input and missing-project failure checks.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "projectId", "value": "" },
+    { "key": "missingProjectId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create project",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Portfolio API\",\n  \"description\": \"A project portfolio API built for a course assignment.\",\n  \"technologies\": [\"Node.js\", \"Express\", \"MongoDB\"],\n  \"githubUrl\": \"https://github.com/example/portfolio-api\",\n  \"liveUrl\": \"https://portfolio.example.com\",\n  \"owner\": \"Student Developer\"\n}"
+        },
+        "url": "{{baseUrl}}/api/projects"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Project created with HTTP 201', function () { pm.response.to.have.status(201); });",
+            "const body = pm.response.json();",
+            "pm.expect(body.success).to.eql(true);",
+            "pm.collectionVariables.set('projectId', body.data._id);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Get all published projects",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/projects"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Projects list returns HTTP 200 and an array', function () {",
+            "  pm.response.to.have.status(200);",
+            "  pm.expect(pm.response.json().data).to.be.an('array');",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Get project by ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/projects/{{projectId}}"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Project details return HTTP 200', function () { pm.response.to.have.status(200); });"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Submit feedback",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Portfolio Visitor\",\n  \"email\": \"visitor@example.com\",\n  \"rating\": 5,\n  \"comment\": \"Clear presentation and a useful project.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/projects/{{projectId}}/feedback"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Feedback submitted with HTTP 201', function () { pm.response.to.have.status(201); });",
+            "pm.expect(pm.response.json().data.project).to.eql(pm.collectionVariables.get('projectId'));"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Feedback for nonexistent project",
+      "event": [{
+        "listen": "prerequest",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "const generatedId = Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join('');",
+            "pm.collectionVariables.set('missingProjectId', generatedId);"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Portfolio Visitor\",\n  \"email\": \"visitor@example.com\",\n  \"rating\": 4,\n  \"comment\": \"Testing the missing project response.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/projects/{{missingProjectId}}/feedback"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Missing project returns the documented 404 error', function () {",
+            "  pm.response.to.have.status(404);",
+            "  pm.expect(pm.response.json()).to.eql({ success: false, message: 'Project not found', error: { code: 'PROJECT_NOT_FOUND', details: 'No project exists with the supplied ID' } });",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Get nonexistent project",
+      "event": [{
+        "listen": "prerequest",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "const generatedId = Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join('');",
+            "pm.collectionVariables.set('missingProjectId', generatedId);"
+          ]
+        }
+      },
+      {
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Valid but nonexistent project ID returns HTTP 404', function () {",
+            "  pm.response.to.have.status(404);",
+            "  pm.expect(pm.response.json().error.code).to.eql('PROJECT_NOT_FOUND');",
+            "});"
+          ]
+        }
+      }],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/projects/{{missingProjectId}}"
+      }
+    },
+    {
+      "name": "Invalid feedback",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Visitor\",\n  \"email\": \"not-an-email\",\n  \"rating\": 9,\n  \"comment\": \"Invalid values\"\n}"
+        },
+        "url": "{{baseUrl}}/api/projects/{{projectId}}/feedback"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Invalid feedback returns HTTP 400', function () { pm.response.to.have.status(400); });"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Invalid project ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/projects/not-an-object-id"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Malformed project ID returns HTTP 400', function () { pm.response.to.have.status(400); });"
+          ]
+        }
+      }]
+    }
+  ]
+}
+
