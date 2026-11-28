@@ -1,0 +1,34 @@
+{
+  "name": "day6-online-exam-auth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JWT authentication and authorization for an online exam platform",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "create-admin": "node scripts/createAdmin.js",
+    "test": "jest --runInBand --runTestsByPath tests/passwordToken.test.js tests/auth.test.js tests/examsAttempts.test.js",
+    "test:integration": "jest --runInBand --runTestsByPath tests/integration.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.3",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 120000,
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  }
+}
+
