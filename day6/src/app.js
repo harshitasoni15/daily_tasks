@@ -5,7 +5,6 @@ const attemptRoutes = require('./routes/attemptRoutes');
 const adminExamRoutes = require('./routes/adminExamRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./errors/AppError');
-
 const app = express();
 
 app.use(express.json({ limit: '32kb' }));
